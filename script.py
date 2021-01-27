@@ -174,7 +174,7 @@ retour = [
 
     Train.parse('TER', '894559', days='SD', besancon_viotte='19h28', besancon_tgv='19h41'), # 40€
     Train.parse('TGV', '9896', days='SD', besancon_tgv='20h15', metz='22h57'),
-    Train.parse('BUS', '35441', days='SD', metz='23h39', nancy='1h16'),
+    Train.parse('BUS', '35441', days='SD', metz='23h39', nancy='1h16'), # be careful with time in past
 ]
 
 aller = [train for train in aller if 'L' in train.days]
@@ -221,7 +221,6 @@ def set_points(src, point=0):
 set_points(departure)
 sorted_stops = sorted(all_stops, key=points.get)
 
-
 trains_from_stop = {stop: [] for stop in sorted_stops}
 trains_to_stop = {stop: [] for stop in sorted_stops}
 for train in aller:
@@ -230,32 +229,56 @@ for train in aller:
         trains_from_stop[src].append(train)
         trains_to_stop[dst].append(train)
         src = dst
-for stop, trains in trains_from_stop.items():
-    trains.sort(key=lambda train: train.stops[stop])
-for stop, trains in trains_to_stop.items():
-    trains.sort(key=lambda train: train.stops[stop])
-print(trains_from_stop['nancy'])
+#for stop, trains in trains_from_stop.items():
+#    trains.sort(key=lambda train: train.stops[stop])
+#for stop, trains in trains_to_stop.items():
+#    trains.sort(key=lambda train: train.stops[stop])
+#print(trains_from_stop['nancy'])
+
+from groups import Group
+for i, train in enumerate(aller):
+    train.group = Group(color=i, time=train.departure_time)
+
+for stop in sorted_stops:
+    for train in trains_from_stop.get(stop, ()):
+        next_trains = [t for t in trains_from_stop[train.arrival] if t.departure_time > train.arrival_time]
+        if next_trains:
+            next_train = min(next_trains, key=lambda t: t.departure_time)
+            train.group.merge(next_train.group)
+    for train in trains_to_stop.get(stop, ()):
+        prev_trains = [t for t in trains_to_stop[train.departure] if t.arrival_time < train.departure_time]
+        if prev_trains:
+            prev_train = max(prev_trains, key=lambda t: t.arrival_time)
+            prev_train.group.merge(train.group)
+
+grouped_trains = {}
+for train in aller:
+    grouped_trains.setdefault(train.group.time, []).append(train)
+grouped_trains = [trains for _, trains in sorted(grouped_trains.items())]
+for group in grouped_trains:
+    group.sort(key=lambda t: t.arrival_time)
+#print(grouped_trains)
 
 
-def score(train):
-    return diff_time(datetime.time(), train.departure_time) - points[train.departure]
-trains = sorted(aller, key=score)
+#def score(train):
+#    return diff_time(datetime.time(), train.departure_time) - points[train.departure]
+#trains = sorted(aller, key=score)
 
-'''
 with open('/tmp/fiche.html', 'w') as f:
     f.write('<table border="1"><thead>')
+    f.write('<th>Train</th>')
     for stop in sorted_stops:
         f.write(f'<th>{stop}</th>')
     f.write('</thead><tbody>')
-    for train in trains:
-        #if 'L' not in train.days:
-        #    continue
-        f.write('<tr>')
-        for stop in sorted_stops:
-            time = train.stops.get(stop, '')
-            if time:
-                time = time.strftime('%H:%M')
-            f.write(f'<td>{time}</td>')
-        f.write('</tr>')
+    for group in grouped_trains:
+        f.write('<tr/>'*5)
+        for train in group:
+            f.write('<tr>')
+            f.write(f'<th>{train.type} {train.id}</th>')
+            for stop in sorted_stops:
+                time = train.stops.get(stop, '')
+                if time:
+                    time = time.strftime('%H:%M')
+                f.write(f'<td>{time}</td>')
+            f.write('</tr>')
     f.write('</tbody></table>')
-'''

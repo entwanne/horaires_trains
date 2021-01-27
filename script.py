@@ -183,6 +183,8 @@ retour = [
     Train.parse('BUS', '35441', days='SD', metz='23h39', nancy='1h16'),
 ]
 
+aller = [train for train in aller if 'L' in train.days]
+
 #print(aller)
 def diff_time(t1, t2):
     return (datetime.datetime.combine(datetime.date.min, t2) - datetime.datetime.combine(datetime.date.min, t1)).total_seconds()
@@ -224,22 +226,42 @@ def set_points(src, point=0):
 
 set_points(departure)
 sorted_stops = sorted(all_stops, key=points.get)
-print('<table border="1"><thead>')
-for stop in sorted_stops:
-    print(f'<th>{stop}</th>')
+
+
+trains_from_stop = {stop: [] for stop in sorted_stops}
+trains_to_stop = {stop: [] for stop in sorted_stops}
+for train in aller:
+    (src, _), *stops = train
+    for dst, _ in stops:
+        trains_from_stop[src].append(train)
+        trains_to_stop[dst].append(train)
+        src = dst
+for stop, trains in trains_from_stop.items():
+    trains.sort(key=lambda train: train.stops[stop])
+for stop, trains in trains_to_stop.items():
+    trains.sort(key=lambda train: train.stops[stop])
+print(trains_from_stop['nancy'])
+
+
 def score(train):
     return diff_time(datetime.time(), train.departure_time) - points[train.departure]
 trains = sorted(aller, key=score)
-for train in trains:
-    if 'L' not in train.days:
-        continue
-    #print(train, score(train))
-    print('<tr>')
+
+'''
+with open('/tmp/fiche.html', 'w') as f:
+    f.write('<table border="1"><thead>')
     for stop in sorted_stops:
-        time = train.stops.get(stop, '')
-        if time:
-            time = time.strftime('%H:%M')
-        print(f"<td>{time}</td>")
-    print('</tr>')
-print('</thead><tbody>')
-print('</tbody></table>')
+        f.write(f'<th>{stop}</th>')
+    f.write('</thead><tbody>')
+    for train in trains:
+        #if 'L' not in train.days:
+        #    continue
+        f.write('<tr>')
+        for stop in sorted_stops:
+            time = train.stops.get(stop, '')
+            if time:
+                time = time.strftime('%H:%M')
+            f.write(f'<td>{time}</td>')
+        f.write('</tr>')
+    f.write('</tbody></table>')
+'''

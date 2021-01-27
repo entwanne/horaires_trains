@@ -42,34 +42,6 @@ class Train:
     def arrival_time(self):
         return next(reversed(self.stops.values()))
 
-    def __add__(self, rhs):
-        if not isinstance(rhs, __class__):
-            return NotImplemented
-        return Trajet(self, rhs)
-
-
-class Trajet:
-    def __init__(self, *trains):
-        self._trains = trains
-
-    def __repr__(self):
-        return cls_repr(type(self), *self._trains)
-
-    def __len__(self):
-        return len(self._trains)
-
-    def __getitem__(self, idx):
-        return self._trains[idx]
-
-    def __iter__(self):
-        return iter(self._trains)
-
-    def __add__(self, rhs):
-        return type(self)(*self._trains, rhs)
-
-    def __radd__(self, lhs):
-        return type(self)(lhs, *self._trains)
-
 
 aller = [
     Train.parse('TER', '88503', days='S', nancy='6h50', metz='7h27'), # 40€
@@ -78,7 +50,6 @@ aller = [
 
     Train.parse('TER', '835013', days='LMaMeJV', nancy='7h14', strasbourg='8h42'), # 50€
     Train.parse('TGV', '9877', days='LMaMeJV', strasbourg='9h05', besancon_tgv='10h46'),
-    #Train.parse('TER', '894518', days='LMaMeJVS', besancon_tgv='11h04', besancon_viotte='11h19'),
 
     Train.parse('TER', '836380', days='LMaMeJV', nancy='7h54', dijon='10h29'), # 45€
     Train.parse('TER', '836380', days='S', nancy='7h58', dijon='10h29'), 
@@ -177,9 +148,6 @@ retour = [
     Train.parse('BUS', '35441', days='SD', metz='23h39', nancy='1h16'), # be careful with time in past
 ]
 
-aller = [train for train in aller if 'L' in train.days]
-
-#print(aller)
 def diff_time(t1, t2):
     return (datetime.datetime.combine(datetime.date.min, t2) - datetime.datetime.combine(datetime.date.min, t1)).total_seconds()
 
@@ -187,29 +155,13 @@ graph = {}
 for train in aller:
     (src, time_src), *stops = train
     for dst, time_dst in stops:
-        #graph.setdefault(start, {}).setdefault(stop, set()).add(train)
-        #graph.setdefault(start, {}).setdefault(stop, set()).add(1)
-        #graph.setdefault(src, set()).add(dst)
         subgraph = graph.setdefault(src, {})
         subgraph[dst] = max(diff_time(time_src, time_dst), subgraph.get(dst, 0))
         src, time_src = dst, time_dst
 
-#print(graph)
-#all_dests = set.union(*graph.values())
 all_dests = set.union(*(set(g.keys()) for g in graph.values()))
 all_stops = graph.keys() | all_dests
-#print(graph)
-#print(all_stops)
 departure, = all_stops - all_dests
-#arrival, = all_stops - graph.keys()
-#print(departure, arrival)
-
-#linear = []
-#from collections import Counter
-#points = Counter()
-#for stops in graph.values():
-#    for stop in stops:
-#        points[stop] += 1
 
 points = {}
 
@@ -229,11 +181,6 @@ for train in aller:
         trains_from_stop[src].append(train)
         trains_to_stop[dst].append(train)
         src = dst
-#for stop, trains in trains_from_stop.items():
-#    trains.sort(key=lambda train: train.stops[stop])
-#for stop, trains in trains_to_stop.items():
-#    trains.sort(key=lambda train: train.stops[stop])
-#print(trains_from_stop['nancy'])
 
 from groups import Group
 for i, train in enumerate(aller):
@@ -257,24 +204,19 @@ for train in aller:
 grouped_trains = [trains for _, trains in sorted(grouped_trains.items())]
 for group in grouped_trains:
     group.sort(key=lambda t: t.arrival_time)
-#print(grouped_trains)
-
-
-#def score(train):
-#    return diff_time(datetime.time(), train.departure_time) - points[train.departure]
-#trains = sorted(aller, key=score)
 
 with open('/tmp/fiche.html', 'w') as f:
     f.write('<table border="1"><thead>')
-    f.write('<th>Train</th>')
+    f.write('<th>Train</th><th>Jours</th>')
     for stop in sorted_stops:
         f.write(f'<th>{stop}</th>')
     f.write('</thead><tbody>')
     for group in grouped_trains:
         f.write('<tr/>'*5)
         for train in group:
+            #if 'L' not in train.days: continue
             f.write('<tr>')
-            f.write(f'<th>{train.type} {train.id}</th>')
+            f.write(f'<th>{train.type} {train.id}</th><th>{train.days}</th>')
             for stop in sorted_stops:
                 time = train.stops.get(stop, '')
                 if time:

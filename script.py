@@ -37,28 +37,29 @@ for train in aller:
         trains_to_stop[dst].append(train)
         src = dst
 
-from groups import Group
-for i, train in enumerate(aller):
-    train.group = Group(color=i, time=train.departure_time)
+from groups import grouper
 
-for stop in sorted_stops:
-    for train in trains_from_stop.get(stop, ()):
-        next_trains = [t for t in trains_from_stop[train.arrival] if t.departure_time > train.arrival_time]
-        if next_trains:
-            next_train = min(next_trains, key=lambda t: t.departure_time)
-            train.group.merge(next_train.group)
-    for train in trains_to_stop.get(stop, ()):
-        prev_trains = [t for t in trains_to_stop[train.departure] if t.arrival_time < train.departure_time]
-        if prev_trains:
-            prev_train = max(prev_trains, key=lambda t: t.arrival_time)
-            prev_train.group.merge(train.group)
+with grouper() as g:
+    for i, train in enumerate(aller):
+        g.add(train, train.departure_time)
 
-grouped_trains = {}
-for train in aller:
-    grouped_trains.setdefault(train.group.time, []).append(train)
-grouped_trains = [trains for _, trains in sorted(grouped_trains.items())]
-for group in grouped_trains:
-    group.sort(key=lambda t: t.arrival_time)
+    for stop in sorted_stops:
+        for train in trains_from_stop.get(stop, ()):
+            next_trains = [t for t in trains_from_stop[train.arrival] if t.departure_time > train.arrival_time]
+            if next_trains:
+                next_train = min(next_trains, key=lambda t: t.departure_time)
+                g.merge(train, next_train)
+        for train in trains_to_stop.get(stop, ()):
+            prev_trains = [t for t in trains_to_stop[train.departure] if t.arrival_time < train.departure_time]
+            if prev_trains:
+                prev_train = max(prev_trains, key=lambda t: t.arrival_time)
+                g.merge(prev_train, train)
+
+    grouped_trains = {
+        time: sorted(trains, key=lambda t: (t.arrival_time, t.departure_time))
+        for time, trains in g.groups()
+    }
+    grouped_trains = [trains for _, trains in sorted(grouped_trains.items())]
 
 with open('/tmp/fiche.html', 'w') as f:
     f.write('<table border="1"><thead>')

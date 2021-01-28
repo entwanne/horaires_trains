@@ -26,6 +26,13 @@ class Train:
     def __iter__(self):
         return iter(self.stops.items())
 
+    def iter_parts(self):
+        it = iter(self)
+        src_item = next(it)
+        for dst_item in it:
+            yield src_item, dst_item
+            src_item = dst_item
+
     @property
     def departure(self):
         return next(iter(self.stops.keys()))

@@ -1,7 +1,18 @@
-from data import aller as trains
-#from data import retour as trains
+import argparse
+import sys
+
+from parse import load
 from groups import grouper
 from sort import get_sorted_stops
+
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--input', '-i', type=argparse.FileType('r'), default=sys.stdin)
+parser.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout)
+
+args = parser.parse_args()
+trains = list(load(args.input))
 
 
 def get_next_train(train, trains):
@@ -49,7 +60,7 @@ sorted_stops = get_sorted_stops(trains)
 grouped_trains = group_trains(trains, sorted_stops)
 
 
-with open('/tmp/fiche.html', 'w') as f:
+def print_table(grouped_trains, f=sys.stdout):
     f.write('<table border="1"><thead>')
     f.write('<th>Train</th><th>Jours</th>')
     for stop in sorted_stops:
@@ -68,3 +79,6 @@ with open('/tmp/fiche.html', 'w') as f:
                 f.write(f'<td>{time}</td>')
             f.write('</tr>')
     f.write('</tbody></table>')
+
+
+print_table(grouped_trains, args.output)

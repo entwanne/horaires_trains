@@ -7,7 +7,8 @@ from .train import Train
 
 
 time_fmt = '%H:%M'
-
+days_names = ('L', 'Ma', 'Me', 'J', 'V', 'S', 'D')
+days_mapping = {name: i for i, name in enumerate(days_names)}
 
 def load(f=sys.stdin):
     reader = csv.reader(f)
@@ -21,6 +22,7 @@ def dump(trains, f=sys.stdout):
 
 def load_train(row):
     train_type, train_id, days, *stops = row
+    days = {i for d, i in days_mapping.items() if d in days}
     stops = zip(stops[::2], stops[1::2])
     stops = {
         stop: datetime.datetime.strptime(time, time_fmt).time()
@@ -29,7 +31,11 @@ def load_train(row):
     return Train(train_type, train_id, days, **stops)
 
 
+def dump_days(days):
+    return ''.join(days_names[i] for i in sorted(days))
+
+
 def dump_train(train):
-    row = [train.type, train.id, train.days]
+    row = [train.type, train.id, dump_days(train.days)]
     stops = ((stop, time.strftime(time_fmt)) for stop, time in train)
     return row + [item for pair in stops for item in pair]

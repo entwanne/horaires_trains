@@ -1,6 +1,7 @@
 import sys
 
 from .parse import time_fmt
+from .parse import dump_days
 
 
 def print_table(sorted_stops, grouped_trains, f=sys.stdout):
@@ -14,7 +15,7 @@ def print_table(sorted_stops, grouped_trains, f=sys.stdout):
         for train in group:
             #if 'L' not in train.days: continue
             f.write('<tr>')
-            f.write(f'<th>{train.type} {train.id}</th><th>{train.days}</th>')
+            f.write(f'<th>{train.type} {train.id}</th><th>{dump_days(train.days)}</th>')
             for stop in sorted_stops:
                 time = train.stops.get(stop, '')
                 if time:

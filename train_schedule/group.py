@@ -1,6 +1,18 @@
 from .utils import grouper
 
 
+def get_day_groups(trains):
+    day_sets = {frozenset(train.days) for train in trains}
+    all_days = frozenset.union(*day_sets)
+    groups = {all_days}
+
+    for day_set in day_sets:
+        couples = ((group & day_set, group - day_set) for group in groups)
+        groups = {group for couple in couples for group in couple if group}
+
+    return sorted(groups, key=tuple)
+
+
 def get_next_train(train, trains):
     trains = [t for t in trains if t.departure_time > train.arrival_time]
     if trains:

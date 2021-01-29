@@ -7,8 +7,11 @@ from .train import Train
 
 
 time_fmt = '%H:%M'
-days_names = ('L', 'Ma', 'Me', 'J', 'V', 'S', 'D')
-days_mapping = {name: i for i, name in enumerate(days_names)}
+day_names = ('L', 'Ma', 'Me', 'J', 'V', 'S', 'D')
+day_full_names = (
+    'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche',
+)
+days_mapping = {name: i for i, name in enumerate(day_names)}
 
 def load(f=sys.stdin):
     reader = csv.reader(f)
@@ -31,8 +34,11 @@ def load_train(row):
     return Train(train_type, train_id, days, **stops)
 
 
-def dump_days(days):
-    return ''.join(days_names[i] for i in sorted(days))
+def dump_days(days, full=False):
+    if full:
+        return ', '.join(day_full_names[i] for i in sorted(days))
+    else:
+        return ''.join(day_names[i] for i in sorted(days))
 
 
 def dump_train(train):

@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 
-from utils import cls_repr
+from .repr import cls_repr
 
 
 class _Group:

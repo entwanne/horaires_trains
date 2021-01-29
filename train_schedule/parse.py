@@ -3,7 +3,7 @@ import datetime
 import io
 import sys
 
-from train import Train
+from .train import Train
 
 
 time_fmt = '%H:%M'

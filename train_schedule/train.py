@@ -1,6 +1,4 @@
-import datetime
-
-from utils import cls_repr
+from .utils import cls_repr
 
 
 class Train:
@@ -11,14 +9,6 @@ class Train:
         self.id = id
         self.days = days
         self.stops = stops
-
-    @classmethod
-    def parse(cls, type, id, days='*', **stops):
-        stops = {
-            stop: datetime.datetime.strptime(time, '%H:%M').time()
-            for stop, time in stops.items()
-        }
-        return cls(type, id, days, **stops)
 
     def __repr__(self):
         return cls_repr(type(self), self.type, self.id, self.days, **self.stops)

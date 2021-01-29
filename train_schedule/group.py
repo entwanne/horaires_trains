@@ -1,18 +1,4 @@
-import argparse
-import sys
-
-from parse import load
-from groups import grouper
-from sort import get_sorted_stops
-
-
-parser = argparse.ArgumentParser()
-
-parser.add_argument('--input', '-i', type=argparse.FileType('r'), default=sys.stdin)
-parser.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout)
-
-args = parser.parse_args()
-trains = list(load(args.input))
+from .utils import grouper
 
 
 def get_next_train(train, trains):
@@ -54,31 +40,3 @@ def group_trains(trains, sorted_stops):
             for time, trains in g.groups()
         }
         return [trains for _, trains in sorted(grouped_trains.items())]
-
-
-sorted_stops = get_sorted_stops(trains)
-grouped_trains = group_trains(trains, sorted_stops)
-
-
-def print_table(grouped_trains, f=sys.stdout):
-    f.write('<table border="1"><thead>')
-    f.write('<th>Train</th><th>Jours</th>')
-    for stop in sorted_stops:
-        f.write(f'<th>{stop}</th>')
-    f.write('</thead><tbody>')
-    for group in grouped_trains:
-        f.write('<tr/>'*5)
-        for train in group:
-            #if 'L' not in train.days: continue
-            f.write('<tr>')
-            f.write(f'<th>{train.type} {train.id}</th><th>{train.days}</th>')
-            for stop in sorted_stops:
-                time = train.stops.get(stop, '')
-                if time:
-                    time = time.strftime('%H:%M')
-                f.write(f'<td>{time}</td>')
-            f.write('</tr>')
-    f.write('</tbody></table>')
-
-
-print_table(grouped_trains, args.output)

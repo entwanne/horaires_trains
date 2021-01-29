@@ -20,7 +20,7 @@ def compute_distances(trains):
             distances.setdefault(src, default)
             old_dist, _, _ = distances.get(dst, default)
 
-            if dist > old_dist:
+            if not old_dist or dist < old_dist:
                 distances[dst] = dist, 1, src
 
     return distances

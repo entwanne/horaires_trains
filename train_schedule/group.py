@@ -32,9 +32,8 @@ def group_trains(trains, sorted_stops):
     with grouper() as g:
         for train in trains:
             g.add(train, train.departure_time)
-            for (src, _), (dst, _) in train.iter_parts():
-                trains_from_stop[src].append(train)
-                trains_to_stop[dst].append(train)
+            trains_from_stop[train.departure].append(train)
+            trains_to_stop[train.arrival].append(train)
 
         for stop in sorted_stops:
             for train in trains_from_stop[stop]:

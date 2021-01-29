@@ -15,7 +15,7 @@ class Train:
     @classmethod
     def parse(cls, type, id, days='*', **stops):
         stops = {
-            stop: datetime.datetime.strptime(time, '%Hh%M').time()
+            stop: datetime.datetime.strptime(time, '%H:%M').time()
             for stop, time in stops.items()
         }
         return cls(type, id, days, **stops)

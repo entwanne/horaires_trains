@@ -13,7 +13,6 @@ TER,839174,D,strasbourg,16:19,nancy,16:45
 TER,894569,D,besancon_viotte,12:23,besancon_tgv,12:36
 TGV,6705,D,besancon_tgv,13:31,mulhouse,14:17
 TER,832326,D,mulhouse,14:34,strasbourg,15:39
-TER,2588,D,strasbourg,15:50,nancy,17:12
 TER,894563,LMaMeJVSD,besancon_viotte,13:38,besancon_tgv,13:55
 TGV,5516,LMaMeJV,besancon_tgv,14:11,nancy,17:30
 TGV,5516,S,besancon_tgv,14:11,nancy,17:16

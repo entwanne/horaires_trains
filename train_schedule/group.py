@@ -23,6 +23,7 @@ def get_day_groups(trains):
     return sorted(groups, key=tuple)
 
 
+# Fix: find trains of the previous day?
 def get_next_train(train, trains):
     "Get direct/earliest connection after a train"
     trains = [t for t in trains if t.departure_time > train.arrival_time]

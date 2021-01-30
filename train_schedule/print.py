@@ -58,6 +58,44 @@ def print_html_sep(file=sys.stdout):
     file.write('<hr/>')
 
 
+def print_md_table(*args, file=sys.stdout, **kwargs):
+    header, *rows = list(iter_table(*args, **kwargs))
+
+    col_sizes = [len(col) for col in header]
+    for row in rows:
+        if row:
+            col_sizes = [max(len(col), col_size) for col, col_size in zip(row, col_sizes)]
+
+    def _print_row(row):
+        print(' | '.join(col.center(col_size) for col, col_size in zip(row, col_sizes)), file=file)
+
+    def _print_split(c=' '):
+        print(f'{c}|{c}'.join(c * col_size for col_size in col_sizes), file=file)
+
+    _print_row(header)
+    _print_split('-')
+
+    split = True
+    for row in rows:
+        if row:
+            split = False
+            _print_row(row)
+        elif not split:
+            split = True
+            _print_split()
+    print(file=file)
+
+
+def print_md_title(title, file=sys.stdout):
+    print(f'## {title}', file=file)
+    print(file=file)
+
+
+def print_md_sep(file=sys.stdout):
+    print('-'*80, file=file)
+    print(file=file)
+
+
 def _dispatch_format(funcs):
     def wrapper(*args, format='html', **kwargs):
         return funcs[format](*args, **kwargs)
@@ -66,12 +104,15 @@ def _dispatch_format(funcs):
 
 print_table = _dispatch_format({
     'html': print_html_table,
+    'md': print_md_table,
 })
 print_title = _dispatch_format({
     'html': print_html_title,
+    'md': print_md_title,
 })
 print_sep = _dispatch_format({
     'html': print_html_sep,
+    'md': print_md_sep,
 })
 
 

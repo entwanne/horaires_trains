@@ -80,7 +80,7 @@ def group_trains(trains, sorted_stops):
 
         # Sort trains in groups by time of arrival & departure
         grouped_trains = {
-            time: sorted(trains, key=lambda t: (t.arrival_time, t.departure_time))
+            time: sorted(trains, key=lambda t: (t.departure_time, t.arrival_time))
             for time, trains in g.groups()
         }
         # Sort groups by departure time of the first train

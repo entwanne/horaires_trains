@@ -6,6 +6,7 @@ from .parse import dump_days
 
 def print_table(sorted_stops, grouped_trains, filter_days=set(), f=sys.stdout,
                 print_days=True):
+    "Print a list of train groups as a HTML table"
     f.write('<table border="1"><thead>')
     f.write('<th>Train</th>')
     if print_days:
@@ -32,6 +33,7 @@ def print_table(sorted_stops, grouped_trains, filter_days=set(), f=sys.stdout,
 
 
 def print_day_tables(sorted_stops, grouped_trains, day_groups, f=sys.stdout):
+    "Print a list of train groups as HTML tables (with a table for each days set)"
     for day_group in day_groups:
         f.write(f'<h2>{dump_days(day_group, full=True)}</h2>')
         print_table(sorted_stops, grouped_trains, day_group, f, print_days=False)

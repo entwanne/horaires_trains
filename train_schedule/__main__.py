@@ -12,7 +12,11 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', '-i', type=argparse.FileType('r'), default=sys.stdin)
     parser.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout)
-    return parser.parse_args()
+    parser.add_argument('--format', '-f', choices=('md', 'html'), default=None)
+    args = parser.parse_args()
+    if args.format is None:
+        args.format = 'html' if args.output.name.endswith('.html') else 'md'
+    return args
 
 
 def main():
@@ -21,7 +25,7 @@ def main():
     day_groups = get_day_groups(trains)
     sorted_stops = get_sorted_stops(trains)
     grouped_trains = group_trains(trains, sorted_stops)
-    print_day_tables(sorted_stops, grouped_trains, day_groups, args.output)
+    print_day_tables(sorted_stops, grouped_trains, day_groups, format=args.format, file=args.output)
 
 
 if __name__ == '__main__':

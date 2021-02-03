@@ -24,7 +24,8 @@ def get_args():
 def main():
     args = get_args()
     trains = list(parse.load(args.input))
-    day_groups = get_day_groups(trains)
+    if not args.unify_days:
+        day_groups = get_day_groups(trains)
     sorted_stops = get_sorted_stops(trains)
     grouped_trains = group_trains(trains, sorted_stops)
     if args.unify_days:

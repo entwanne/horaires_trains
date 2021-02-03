@@ -9,9 +9,11 @@ class _Group:
         self.key = key
         self.set = {self}
 
-    def merge(self, rhs):
+    def merge(self, rhs, merge_key_func=None):
         # Merge = union of both groups sets
         self.set.update(rhs.set)
+        if merge_key_func:
+            self.key = merge_key_func(self.key, rhs.key)
         for item in rhs.set:
             item.key = self.key
             item.set = self.set
@@ -79,17 +81,20 @@ class Grouper:
         objh = HashInstance(obj)
         return self._groups_by_object[objh]
 
+    def get_key(self, obj):
+        return self._obj_group(obj).key
+
     def equal(self, lhs, rhs):
         "Compare groups of two objects"
         lgroup = self._obj_group(lhs)
         rgroup = self._obj_group(rhs)
         return lgroup.set is rgroup.set
 
-    def merge(self, lhs, rhs):
+    def merge(self, lhs, rhs, merge_key=None):
         "Merge groups of two objects"
         lgroup = self._obj_group(lhs)
         rgroup = self._obj_group(rhs)
-        lgroup.merge(rgroup)
+        lgroup.merge(rgroup, merge_key_func=merge_key)
 
     def groups(self):
         "Iterate over objects by group"
@@ -140,6 +145,7 @@ if __name__ == '__main__':
     with grouper() as g:
         for i, obj in enumerate(objects):
             g.add(obj, i)
+            assert g.get_key(obj) is i
 
         for left, right in zip(objects[::2], objects[1::2]):
             g.merge(left, right)

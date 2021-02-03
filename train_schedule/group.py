@@ -71,13 +71,13 @@ def group_trains(trains, sorted_stops):
             for train in trains_from_stop[stop]:
                 next_train = get_next_train(train, trains_from_stop[train.arrival])
                 if next_train:
-                    g.merge(train, next_train)
+                    g.merge(train, next_train, merge_key=min)
 
             # Connect each train with previous one
             for train in trains_to_stop[stop]:
                 prev_train = get_prev_train(train, trains_to_stop[train.departure])
                 if prev_train:
-                    g.merge(prev_train, train)
+                    g.merge(train, prev_train, merge_key=min)
 
         # Sort trains in groups by time of arrival & departure
         grouped_trains = {

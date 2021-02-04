@@ -24,10 +24,10 @@ def get_args():
 def main():
     args = get_args()
     trains = list(parse.load(args.input))
-    if not args.unify_days:
-        day_groups = get_day_groups(trains)
     sorted_stops = get_sorted_stops(trains)
     grouped_trains = group_trains(trains, sorted_stops)
+    if not args.unify_days:
+        day_groups = get_day_groups(trains)
     if args.unify_days:
         print_table(sorted_stops, grouped_trains, format=args.format, file=args.output)
     else:

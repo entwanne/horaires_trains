@@ -1,6 +1,5 @@
 import csv
 import datetime
-import io
 import sys
 
 from .train import Train
